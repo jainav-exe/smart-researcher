@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+# Must run before CrewAI/Chroma imports on Streamlit Cloud.
+import sys
+
+if sys.platform != "win32":
+    __import__("pysqlite3")
+    sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
+
 import os
 from textwrap import dedent
-
 import certifi
 from dotenv import load_dotenv
 

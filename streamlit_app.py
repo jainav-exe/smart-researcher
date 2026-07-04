@@ -1,3 +1,10 @@
+# CrewAI/Chroma needs sqlite >= 3.35 on Streamlit Cloud (Ubuntu ships older sqlite).
+import sys
+
+if sys.platform != "win32":
+    __import__("pysqlite3")
+    sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
+
 import streamlit as st
 
 from research_crew import missing_env_vars, run_research
@@ -52,13 +59,13 @@ def load_secrets_into_env() -> None:
     import os
 
     for key in ("GEMINI_API_KEY", "SERPER_API_KEY"):
-        if not os.environ.get(key):
-            try:
-                value = st.secrets.get(key)
-                if value:
-                    os.environ[key] = value
-            except (FileNotFoundError, KeyError, AttributeError):
-                pass
+        if os.environ.get(key):
+            continue
+        try:
+            if key in st.secrets:
+                os.environ[key] = st.secrets[key]
+        except (FileNotFoundError, KeyError, AttributeError, TypeError):
+            pass
 
 
 load_secrets_into_env()
